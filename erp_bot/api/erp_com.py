@@ -76,7 +76,7 @@ def update_telegram_id(emp_docname, telegram_id):
 def send_otp_email(recipient_email, otp):
     payload = {
         "recipients": recipient_email,
-        "sender": "arundevraj92@gmail.com",
+        "sender": "yourexample@gmail.com",
         "subject": "OTP Verification - ERP Telegram Link",
         "content": f"Your OTP for linking Telegram to ERP is: {otp}",
         "communication_medium": "Email",

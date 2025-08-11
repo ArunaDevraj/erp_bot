@@ -26,10 +26,10 @@ from telegram.ext import (
 from telegram.error import BadRequest
 
 # === Configuration ===
-BOT_TOKEN = "7635250780:AAFPt4_4ipNjeItpj4-xic01tz0XzOsZ0II"
-ERP_URL = "http://erpdevelop.icfoss.org"
-ERP_API_KEY = "59760dc674538d5"
-ERP_API_SECRET = "509dff519cd56d1"
+BOT_TOKEN = "Your Bot father Token"
+ERP_URL = "Your Site name"
+ERP_API_KEY = "Your API Key"
+ERP_API_SECRET = "Your API Secret Key"
 
 HEADERS = {
     "Authorization": f"token {ERP_API_KEY}:{ERP_API_SECRET}",

@@ -1,4 +1,4 @@
-🤖 ERPNext Telegram Bot with OTP Verification, Leave Application & Location-Based Check-In/Out
+🤖 ERPNext Telegram Bot — OTP Verification, Leave Application & Location-Based Check-In/Out
 
 This project integrates a Telegram bot with your ERPNext instance, enabling employees to:
 
@@ -10,84 +10,135 @@ This project integrates a Telegram bot with your ERPNext instance, enabling empl
 
 The bot communicates with ERPNext through its REST API and uses the python-telegram-bot library.
 🚀 Features
-
-    /start — Displays the main menu
-
-    /help — Lists all available commands
-
-    /id — Starts OTP verification to link your Telegram ID with your Employee record
-
-    /resend_otp — Resend OTP if verification is pending
-
-    /apply_leave — Apply for leave with an interactive date picker and real-time balance check
-
-    /checkinout — Location-based employee check-in/out
-
-    /cancel — Cancel any ongoing process and return to the main menu
-
+Command	Description
+/start	Displays the main menu
+/help	: Lists all available commands
+/id	Initiates OTP verification to link Telegram ID with Employee record
+/resend_otp	Resends OTP if verification is pending
+/apply_leave	Apply for leave with an interactive date picker and real-time balance check
+/checkinout	Perform location-based employee check-in/out
+/cancel	Cancel any ongoing process and return to the main menu
 📦 Prerequisites
 
-    Frappe / ERPNext Version: 12+
+    ERPNext / Frappe Version: v12+
 
     Python: 3.8+
 
-    Installed ERPNext REST API enabled
+    ERPNext REST API enabled
 
     python-telegram-bot v20+
 
-    ERPNext Email Notification configuration (for sending OTPs)
+    ERPNext Email Notification is configured for sending OTPs
 
-⚖️ Step 1: Install Dependencies
+⚖️ Step 1: Telegram Integration with ERPNext
+
+
+A. Install the ERPNext Telegram App
+
+Inside the Frappe bench environment, run:
+
+./env/bin/pip install python-telegram-bot --upgrade
+
+This ensures the package is installed in the correct environment (not globally).
+B. Get the Integration App
+
+bench get-app erpnext_telegram_integration https://github.com/yrestom/erpnext_telegram.git
+
+C. Install the App on Your Site
+
+bench --site [your.site.name] install-app erpnext_telegram_integration
+
+D. Build and Restart
+
+bench build
+bench restart
+
+⚙️ Step 2: Install Bot Dependencies
 
 Inside your bench environment, run:
 
 ./env/bin/pip install python-telegram-bot aiohttp requests --upgrade
 
-🤖 Step 2: Create a Telegram Bot
+🤖 Step 3: Create a Telegram Bot
 
     Open Telegram and search for @BotFather
 
     Use /newbot and follow the prompts
 
-    Save the Telegram Bot Token you receive — you’ll need it for configuration
+    Save the Bot Token — you will need it later
 
-⚙️ Step 3: Configure ERPNext
-A. Add Custom Fields to Employee
+⚙️ Step 4: Configure ERPNext
+A. Telegram Settings
 
-Add the following custom fields in the Employee doctype:
+    Go to Telegram Settings in ERPNext
 
-    custom_telegram_id (Data) — To store the linked Telegram ID
+    Create a new record and set:
 
-    custom_allowed_latitude (Float) — Allowed check-in latitude
+        Bot Username
 
-    custom_allowed_longitude (Float) — Allowed check-in longitude
+        Bot Token (from BotFather)
 
-    custom_allowed_radius (Float) — Allowed check-in radius in meters
+B. Telegram User Settings
 
-🧠 Step 4: Configure the Bot Script
+    Go to Telegram User Settings in ERPNext
 
-Update these variables in your Python script (erp_bot.py):
+    Create a new entry:
+
+        Party → Employee
+
+        Employee → Select the employee
+
+        Telegram Settings → Choose the settings created above
+
+        (Optional) Check Is Group Chat if this is for a group
+
+    Click Generate Telegram Token → copy it
+
+    Send this token to the bot in a private message
+
+    Return to ERPNext and click Get Chat ID
+
+    Save the record once successful
+
+🧩 Step 5: Custom Fields in Employee Doctype
+
+Add the following custom fields in Employee:
+Field Name	Type	Description
+custom_telegram_id	Data	Stores linked Telegram ID
+custom_allowed_latitude	Float	Allowed check-in latitude
+custom_allowed_longitude	Float	Allowed check-in longitude
+custom_allowed_radius	Float	Allowed check-in radius (meters)
+
+
+🛠 Step 6: Bot Script Configuration
+
+Create and edit erp_com.py:
 
 BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
 ERP_URL = "https://your-erpnext-url"
 ERP_API_KEY = "your-api-key"
 ERP_API_SECRET = "your-api-secret"
 
-Ensure the API key and secret belong to a user with access to the Employee, Leave Application, and Employee Checkin document types.
-🛠 Step 5: Running the Bot
+Ensure the API key and secret belong to a user with access to Employee, Leave Application, and Employee Checkin doctypes.
+
+
+▶️ Step 7: Running the Bot
+
+
 A. Manual Run (Testing)
 
 python3 erp_com.py
 
 B. Run as a Background Service
 
-Create a virtual environment for the bot:
+    Create a virtual environment:
 
 python3 -m venv erpbot-env
 source erpbot-env/bin/activate
 pip install python-telegram-bot aiohttp requests
 
-Create /etc/systemd/system/erpbot.service:
+Create a systemd service file:
+/etc/systemd/system/erpbot.service
 
 [Unit]
 Description=ERPNext Telegram Bot Service
@@ -102,37 +153,49 @@ User=your-username
 [Install]
 WantedBy=multi-user.target
 
-Enable and start:
+Enable & start the service:
 
-sudo systemctl daemon-reload
-sudo systemctl enable erpbot.service
-sudo systemctl start erpbot.service
-sudo systemctl status erpbot.service
+    sudo systemctl daemon-reload
+    sudo systemctl enable erpbot.service
+    sudo systemctl start erpbot.service
+    sudo systemctl status erpbot.service
 
-👨‍💼 Step 6: Linking Telegram to ERPNext
+🔑 Step 8: Linking Telegram to ERPNext
 
     In Telegram, type /id and enter your Employee ID when prompted
 
     You will receive an OTP on your registered email
 
-    Enter the OTP in Telegram to link your account
+    Enter the OTP in Telegram
 
-    Your Telegram ID will be stored in the custom_telegram_id field
+    Your Telegram ID will be saved in custom_telegram_id
 
-📍 Step 7: Location-Based Check-In/Out
+📍 Step 9: Location-Based Check-In/Out
 
-    Admin must set custom_allowed_latitude, custom_allowed_longitude, and custom_allowed_radius for each employee
+    Admin must set:
 
-    When /checkinout is used, the bot verifies your current GPS location against the allowed location & radius before recording attendance
+        custom_allowed_latitude
+
+        custom_allowed_longitude
+
+        custom_allowed_radius
+
+    When /checkinout is used, the bot:
+
+        Captures your GPS location
+
+        Verifies it is within the allowed radius
+
+        Records attendance if valid
 
 ✅ How It Works
 
-    OTP Linking: /id sends OTP via ERPNext’s email system; once verified, the Telegram ID is saved
+    OTP Verification → /id sends an OTP via ERPNext email; once verified, saves Telegram ID
 
-    Leave Application: /apply_leave fetches leave policy, balance, and uses inline keyboards for selecting dates & reason
+    Leave Application → /apply_leave fetches policy, balance, and uses inline keyboards for date selection
 
-    Check-In/Out: /checkinout ensures the GPS location matches allowed parameters before creating an Employee Checkin record
+    Check-In/Out → /checkinout verifies GPS location before creating an Employee Checkin record
 
 📜 License
 
-MIT License — free to use, modify, and distribute
+MIT License — free to use, modify, and distribute.
